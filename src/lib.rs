@@ -58,6 +58,10 @@ struct Pixel {
     dirty: bool,
 }
 
+pub trait GamePlay {
+    fn draw(&mut self, engine: &mut GameEngine, elapsed_time: f64) -> bool;
+}
+
 pub struct GameEngine {
     grid: Vec<Pixel>,
     width: usize,
@@ -158,9 +162,7 @@ impl GameEngine {
         }
     }
 
-    pub fn begin<T>(&mut self, mut func: T)
-    where
-        T: FnMut(&mut Self, f64) -> bool,
+    pub fn begin<T: GamePlay>(&mut self, game_play: &mut T)
     {
         use std::time::*;
 
@@ -169,8 +171,8 @@ impl GameEngine {
             let elapsed_time = now.elapsed();
             now = Instant::now();
 
-            if func(self, elapsed_time.as_secs_f64()) == false {
-                break;      // exit game loop
+            if game_play.draw(self, elapsed_time.as_secs_f64()) == false {
+                break; // exit game loop
             }
 
             self.flush();

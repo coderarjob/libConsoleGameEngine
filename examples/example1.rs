@@ -1,53 +1,13 @@
 use libconsolegameengine::*;
 
-fn main() {
-    let mut x: f64 = 0.0;
-    let mut y: f64 = 0.0;
-    let xvel: f64 = 2.0;
-
-    let mut engine = GameEngine::new(80, 40);
-    engine.begin(|e, elapsed_time| {
-        e.fill(
-            0,
-            0,
-            e.width(),
-            e.height(),
-            BlockChars::DarkShade,
-            BackgroundColors::Black,
-            ForegroundColors::White,
-        )
-        .unwrap();
-
-        e.fill(
-            x as usize,
-            y as usize,
-            10,
-            1,
-            BlockChars::Solid,
-            BackgroundColors::Black,
-            ForegroundColors::White,
-        )
-        .unwrap();
-
-        x += xvel * elapsed_time;
-        y = x.sin() * e.height() as f64 / 2.0;
-        true
-    });
+struct MyGamePlay {
+    x: f64,
+    y: f64,
+    xvel: f64
 }
 
-/*fn main() {
-    let mut engine = GameEngine::new(80, 40);
-    let mut x:f64 = 0.0;
-    let mut y:f64 = 0.0;
-
-    let mut now = Instant::now();
-    let xvel:f64 = 2.0;
-    let yvel:f64 = 2.0;
-
-    for _ in 0.. {
-        let elapsed_time = now.elapsed();
-        now = Instant::now();
-
+impl GamePlay for MyGamePlay {
+    fn draw(&mut self, engine: &mut GameEngine, elapsed_time: f64) -> bool {
         engine.fill(
             0,
             0,
@@ -56,11 +16,12 @@ fn main() {
             BlockChars::DarkShade,
             BackgroundColors::Black,
             ForegroundColors::White,
-        ).unwrap();
+        )
+        .unwrap();
 
         engine.fill(
-            x as usize,
-            y as usize,
+            self.x as usize,
+            self.y as usize,
             10,
             1,
             BlockChars::Solid,
@@ -68,10 +29,15 @@ fn main() {
             ForegroundColors::White,
         ).unwrap();
 
-        engine.flush();
+        self.x += self.xvel * elapsed_time;
+        self.y = self.x.sin() * engine.height() as f64/2.0;
 
-        x += xvel * elapsed_time.as_secs_f64();
-        y = x.sin() * engine.height() as f64/2.0;
-        std::thread::sleep (Duration::from_millis(10));
+        true
     }
-}*/
+}
+
+fn main() {
+    let mut game_play = MyGamePlay { x: 0.0, y: 0.0, xvel: 2.0};
+    let mut engine = GameEngine::new(80, 40);
+    engine.begin(&mut game_play);
+}
