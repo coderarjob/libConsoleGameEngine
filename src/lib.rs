@@ -1,5 +1,9 @@
 #![allow(dead_code)]
 
+pub mod terminal;
+use std::time::*;
+use std::io::Error;
+
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq)]
 pub enum ForegroundColors {
@@ -123,7 +127,9 @@ impl GameEngine {
         Ok(())
     }
 
-    pub fn flush(&mut self) {
+    pub fn flush(&mut self) -> Result<(),Error> {
+
+        // Move cursor to 1,1 location.
         println!("\x1b[1;1f");
 
         /*for y in 0..self.height {
@@ -152,19 +158,20 @@ impl GameEngine {
                     pixel.dirty = false;
 
                     //print!("\x1b[{};{}f",y + 20,x + 1);
-                    print!("\x1b[{};{}f", y + 1, x + 1);
+                    print!("\x1b[{};{}f", y + 1, x + 1); // Move cursor
                     print!("\x1b[{};{}m", pixel.bg_color as u32, pixel.fg_color as u32);
                     print!("{}", c);
-                    print!("\x1b[0m");
+                    print!("\x1b[0m"); // Reset colors
                 }
             }
             print!("\n");
         }
+
+        Ok(())
     }
 
-    pub fn begin<T: GamePlay>(&mut self, game_play: &mut T)
-    {
-        use std::time::*;
+    pub fn begin<T: GamePlay>(&mut self, game_play: &mut T) ->Result<(), Error> {
+        terminal::enter_raw_mode()?;
 
         let mut now = Instant::now();
         loop {
@@ -175,8 +182,12 @@ impl GameEngine {
                 break; // exit game loop
             }
 
-            self.flush();
-            std::thread::sleep (Duration::from_millis(10));
+            self.flush()?;
+            std::thread::sleep(Duration::from_millis(10));
         }
+
+        terminal::enter_canon_mode()?;
+        terminal::disable_non_blocking_stdio()?;
+        Ok(())
     }
 }
