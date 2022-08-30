@@ -1,4 +1,4 @@
-use libarl::ffi::*;
+use libarl::*;
 use std::io::Error;
 use std::os::unix::io::*;
 
@@ -22,7 +22,7 @@ pub fn enable_non_blocking_stdio() -> Result<(), Error> {
     let stdin_fd = std::io::stdin().as_raw_fd();
 
     // Enable Non Blocking read and write.
-    libc_fcntl(stdin_fd, F_SETFL, Some(O_NONBLOCK))?;
+    fcntl(stdin_fd, F_SETFL, Some(O_NONBLOCK))?;
     Ok(())
 }
 
@@ -30,8 +30,8 @@ pub fn disable_non_blocking_stdio() -> Result<(), Error> {
     let stdin_fd = std::io::stdin().as_raw_fd();
 
     // Disable Non Blocking read and write.
-    let fd_flags = libc_fcntl(stdin_fd, F_GETFL, None)?;
-    libc_fcntl(stdin_fd, F_SETFL, Some(fd_flags & !O_NONBLOCK))?;
+    let fd_flags = fcntl(stdin_fd, F_GETFL, None)?;
+    fcntl(stdin_fd, F_SETFL, Some(fd_flags & !O_NONBLOCK))?;
     Ok(())
 }
 
@@ -40,10 +40,10 @@ pub fn enter_raw_mode() -> Result<(), Error> {
 
     // Switch to raw mode (Non cannonical and no echo)
     let mut t: Termios = Default::default();
-    libc_tcgetattr(stdout_fd, &mut t)?;
+    tcgetattr(stdout_fd, &mut t)?;
 
     t.c_lflag &= !(ICANON | ECHO);
-    libc_tcsetattr(stdout_fd, TCSAFLUSH, &t)?;
+    tcsetattr(stdout_fd, TCSAFLUSH, &t)?;
     Ok(())
 }
 
@@ -52,11 +52,11 @@ pub fn enter_canon_mode() -> Result<(), Error> {
 
     // Disable to raw mode and enable echoing
     let mut t: Termios = Default::default();
-    libc_tcgetattr(stdout_fd, &mut t)?;
+    tcgetattr(stdout_fd, &mut t)?;
 
     //t.c_lflag |= ICANON | ECHO;
     t.c_lflag |= ICANON;
-    libc_tcsetattr(stdout_fd, TCSAFLUSH, &t)?;
+    tcsetattr(stdout_fd, TCSAFLUSH, &t)?;
     Ok(())
 }
 
@@ -64,8 +64,8 @@ fn get_keybytes() -> Option<String> {
     let mut key_bytes = String::default();
 
     loop {
-        match libc_getchar() {
-            Err(GetcharErrors::EOF) => {
+        match getchar() {
+            Err(_) => {
                 return match key_bytes.len() {
                     0 => None,
                     _ => Some(key_bytes),

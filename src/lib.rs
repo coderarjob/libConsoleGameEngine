@@ -1,9 +1,51 @@
+//! Console Game Engine for Linux-like OS
+//!
+//! This library was inspired by the [`olcConsoleGameEngine`] library. It is my attempt to
+//! recreate frw of its features in Linux.
+//!
+//! 1. Creates a game board (which is a rectangle of some widh and height in characters), and
+//!    includes functions to fill the board with block Unicode characters. This can use used to
+//!    draw the 'World' as well as other 'assets' for the game.
+//!
+//! 2. Function to read input from keyboard in a non-blocking fation.
+//!
+//! # Example
+//!
+//! ```rust
+//! use libconsolegameengine::terminal::Keys::*;
+//! use libconsolegameengine::*;
+//!
+//! struct MyGamePlay;
+//! impl GamePlay for MyGamePlay {
+//!     fn draw(&mut self, engine: &mut GameEngine, elapsed_time: f64) -> bool {
+//!         engine.fill(
+//!                     0,
+//!                     0,
+//!                     engine.width(),
+//!                     engine.height(),
+//!                     BlockChars::DarkShade,
+//!                     BackgroundColors::Black,
+//!                     ForegroundColors::White,
+//!                 ).unwrap();
+//!         true
+//!     }
+//! }
+//!  fn main() {
+//!     let mut game_play = MyGamePlay;
+//!     let mut engine = GameEngine::new(80, 40);
+//!     engine.begin(&mut game_play).unwrap();
+//!  }
+//!  ```
+//!
+//! [`olcConsoleGameEngine`]: https://github.com/OneLoneCoder/videos/blob/master/olcConsoleGameEngine.h
+
 #![allow(dead_code)]
 
 pub mod terminal;
 use std::time::*;
 use std::io::Error;
 
+/// Unix terminal Foreground colors.
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq)]
 pub enum ForegroundColors {
@@ -17,6 +59,7 @@ pub enum ForegroundColors {
     White = 37,
 }
 
+/// Unix terminal Background colors.
 #[repr(C)]
 #[derive(Copy, Clone, PartialEq)]
 pub enum BackgroundColors {
@@ -30,6 +73,7 @@ pub enum BackgroundColors {
     White = 47,
 }
 
+/// Unicode Block characters used to draw items in the game board.
 #[derive(Copy, Clone, PartialEq)]
 pub enum BlockChars {
     Blank,
@@ -54,6 +98,7 @@ impl From<BlockChars> for char {
     }
 }
 
+/// Represents each character which can be drawn.
 #[derive(Copy, Clone)]
 struct Pixel {
     character: BlockChars,
@@ -62,10 +107,13 @@ struct Pixel {
     dirty: bool,
 }
 
+/// Need to be implemented for the game state struct.
 pub trait GamePlay {
+    /// Contains the logic to change game state and draw the game world.
     fn draw(&mut self, engine: &mut GameEngine, elapsed_time: f64) -> bool;
 }
 
+/// Contains the game board and its properties.
 pub struct GameEngine {
     grid: Vec<Pixel>,
     width: usize,
@@ -73,6 +121,7 @@ pub struct GameEngine {
 }
 
 impl GameEngine {
+    /// Creates a new game engine to represent a game board of the specified dimensions.
     pub fn new(width: usize, height: usize) -> GameEngine {
         GameEngine {
             width,
@@ -89,13 +138,20 @@ impl GameEngine {
         }
     }
 
+    /// Game board width (in characters).
     pub fn width(&self) -> usize {
         self.width
     }
+
+    /// Game board height (in characters).
     pub fn height(&self) -> usize {
         self.height
     }
 
+    /// Fills a rectangle within the game board with the foregound and background colors.
+    ///
+    /// This is used to both draw assets and clear the game board.
+    /// Only those pixels are updated which has changed since the previous.
     pub fn fill(
         &mut self,
         left: usize,
@@ -127,12 +183,16 @@ impl GameEngine {
         Ok(())
     }
 
+    /// Prints the game board and game world on the terminal.
+    ///
+    /// Only those pixels are drawn which has changed since the previous.
     pub fn flush(&mut self) -> Result<(),Error> {
 
         // Move cursor to 1,1 location.
         println!("\x1b[1;1f");
 
-        /*for y in 0..self.height {
+        #[cfg(feature = "debug")]
+        for y in 0..self.height {
             for x in 0..self.width {
                 let index = y * self.width + x;
                 let pixel = &self.grid[index];
@@ -146,7 +206,7 @@ impl GameEngine {
                 print!("\x1b[0m");
             }
             print!("\n");
-        }*/
+        }
 
         for y in 0..self.height {
             for x in 0..self.width {
@@ -170,6 +230,8 @@ impl GameEngine {
         Ok(())
     }
 
+    /// This contains the game loop and executes the use logic for game play and drawing of the
+    /// game world.
     pub fn begin<T: GamePlay>(&mut self, game_play: &mut T) ->Result<(), Error> {
         terminal::enter_raw_mode()?;
 

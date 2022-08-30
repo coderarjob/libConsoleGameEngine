@@ -56,8 +56,8 @@ fn main() {
     let mut game_play = MyGamePlay {
         x: 0.0,
         y: 0.0,
-        xvel: 400.0,
-        yvel: 100.0,
+        xvel: 400.0,    // 400 blocks/sec
+        yvel: 100.0,    // 100 blocks/sec
     };
     let mut engine = GameEngine::new(80, 40);
     engine.begin(&mut game_play).unwrap();
