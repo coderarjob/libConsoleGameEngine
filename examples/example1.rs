@@ -43,9 +43,9 @@ impl GamePlay for MyGamePlay {
             }
         }
 
-        /*let fps = 1.0/elapsed_time;
+        let fps = 1.0/elapsed_time;
         let legend = format!("FPS: {}", fps);
-        engine.draw_string(0, 0, &legend, BackgroundColors::White, ForegroundColors::Black);*/
+        engine.draw_string(0, 0, &legend, BackgroundColors::White, ForegroundColors::Black);
 
         //self.x += self.xvel * elapsed_time;
         //self.y = self.x.sin() * engine.height() as f64 / 2.0;
