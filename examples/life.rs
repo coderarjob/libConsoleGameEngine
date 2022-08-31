@@ -1,3 +1,12 @@
+//! Conways game of life
+//!
+//! This example creates a game board of 220 x 120 characters, which can be too large for the
+//! terminals with large font sizes. If you want to view the whole game board, lower the font size.
+//! You can use the below command to run the example:
+//! ```bash
+//! $ xterm -en UTF-8 -bg black -fg white -fa 'DejaVu Sans Mono:size=4.0:antialias=true' -e cargo run --example life
+//! ```
+
 use libconsolegameengine::terminal::{Keys, *};
 use libconsolegameengine::*;
 
