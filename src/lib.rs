@@ -42,8 +42,8 @@
 #![allow(dead_code)]
 
 pub mod terminal;
-use std::time::*;
 use std::io::Error;
+use std::time::*;
 
 /// Unix terminal Foreground colors.
 #[repr(C)]
@@ -148,6 +148,24 @@ impl GameEngine {
         self.height
     }
 
+    /// Draws a string at the specified coordinate.
+    ///
+    /// Only those pixels are updated which has changed since the previous.
+    pub fn draw_string(
+        &mut self,
+        x: usize,
+        y: usize,
+        s: &str,
+        bg_color: BackgroundColors,
+        fg_color: ForegroundColors,
+    ) {
+        let mut x = x;
+        for c in s.chars() {
+            self.draw_pixel(x, y, BlockChars::Custom(c), bg_color, fg_color);
+            x += 1;
+        }
+    }
+
     /// Fills a rectangle within the game board with the foregound and background colors.
     ///
     /// This is used to both draw assets and clear the game board.
@@ -161,52 +179,66 @@ impl GameEngine {
         c: BlockChars,
         bg_color: BackgroundColors,
         fg_color: ForegroundColors,
-    ) -> Result<(), &'static str> {
+    ) {
         for y in top..(top + height) {
             for x in left..(left + width) {
-                let index = y * self.width + x;
-
-                let mut pixel = &mut self.grid[index];
-                let is_same = pixel.bg_color == bg_color
-                    && pixel.fg_color == fg_color
-                    && pixel.character == c;
-
-                if !is_same {
-                    pixel.bg_color = bg_color;
-                    pixel.fg_color = fg_color;
-                    pixel.character = c;
-                    pixel.dirty = true;
-                }
+                self.draw_pixel(x, y, c, bg_color, fg_color);
             }
         }
+    }
 
-        Ok(())
+    // Sets a pixel at a specific coordinate.
+    //
+    /// This can be used to draw assets on the game board.
+    /// Only those pixels are updated which has changed since the previous.
+    pub fn draw_pixel(
+        &mut self,
+        x: usize,
+        y: usize,
+        c: BlockChars,
+        bg_color: BackgroundColors,
+        fg_color: ForegroundColors,
+    ) {
+        let index = y * self.width + x;
+
+        let mut pixel = &mut self.grid[index];
+        let is_same =
+            pixel.bg_color == bg_color && pixel.fg_color == fg_color && pixel.character == c;
+
+        if !is_same {
+            pixel.bg_color = bg_color;
+            pixel.fg_color = fg_color;
+            pixel.character = c;
+            pixel.dirty = true;
+        }
     }
 
     /// Prints the game board and game world on the terminal.
     ///
     /// Only those pixels are drawn which has changed since the previous.
-    pub fn flush(&mut self) -> Result<(),Error> {
-
+    pub fn flush(&mut self) {
         // Move cursor to 1,1 location.
         println!("\x1b[1;1f");
 
-        #[cfg(feature = "debug")]
-        for y in 0..self.height {
+        /*for y in 0..self.height {
             for x in 0..self.width {
                 let index = y * self.width + x;
                 let pixel = &self.grid[index];
                 let fg_color = match pixel.dirty {
                     true => ForegroundColors::Red,
-                    false => ForegroundColors::White
+                    false => ForegroundColors::White,
                 };
 
-                print!("\x1b[{};{}m", BackgroundColors::Black as u32, fg_color as u32);
-                print! ("{{{},{}}}", x,y);
+                print!(
+                    "\x1b[{};{}m",
+                    BackgroundColors::Black as u32,
+                    fg_color as u32
+                );
+                print!("{{{},{}}}", x, y);
                 print!("\x1b[0m");
             }
             print!("\n");
-        }
+        }*/
 
         for y in 0..self.height {
             for x in 0..self.width {
@@ -217,22 +249,20 @@ impl GameEngine {
                     let c: char = pixel.character.into();
                     pixel.dirty = false;
 
-                    //print!("\x1b[{};{}f",y + 20,x + 1);
+                    //print!("\x1b[{};{}f", y + self.height, x + 1);
                     print!("\x1b[{};{}f", y + 1, x + 1); // Move cursor
                     print!("\x1b[{};{}m", pixel.bg_color as u32, pixel.fg_color as u32);
                     print!("{}", c);
-                    print!("\x1b[0m"); // Reset colors
                 }
             }
-            print!("\n");
         }
 
-        Ok(())
+        print!("\x1b[0m"); // Reset colors
     }
 
     /// This contains the game loop and executes the use logic for game play and drawing of the
     /// game world.
-    pub fn begin<T: GamePlay>(&mut self, game_play: &mut T) ->Result<(), Error> {
+    pub fn begin<T: GamePlay>(&mut self, game_play: &mut T) -> Result<(), Error> {
         terminal::enter_raw_mode()?;
 
         let mut now = Instant::now();
@@ -244,7 +274,7 @@ impl GameEngine {
                 break; // exit game loop
             }
 
-            self.flush()?;
+            self.flush();
             std::thread::sleep(Duration::from_millis(10));
         }
 
