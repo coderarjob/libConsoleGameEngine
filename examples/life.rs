@@ -1,3 +1,4 @@
+use libconsolegameengine::terminal::{Keys, *};
 use libconsolegameengine::*;
 
 #[derive(Clone)]
@@ -11,6 +12,22 @@ struct Game {
 impl GamePlay for Game {
     fn draw(&mut self, engine: &mut GameEngine, elapsed_time: f64) -> bool {
         let snapshot = self.world.clone();
+
+        // Draw the Generation and FPS
+        let fps = 1.0 / elapsed_time;
+        let legend = format!("Generation: {} FPS: {:3.2}", self.generation, fps);
+        engine.draw_string(
+            0,
+            0,
+            &format!("{:40}", &legend),
+            BackgroundColors::White,
+            ForegroundColors::Black,
+        );
+
+        // Press enter to exit
+        if let Ok(Keys::Enter) = get_keypress() {
+            return false;
+        }
 
         for x in 1..engine.width() - 1 {
             for y in 1..engine.height() - 1 {
@@ -32,11 +49,6 @@ impl GamePlay for Game {
                     )
                 }
 
-                let fps = 1.0/elapsed_time;
-                //let legend = format!("Generation: {:10} FPS: {:3.2}", self.generation, fps);
-                let legend = format!("Generation: {} FPS: {}", self.generation, fps);
-                engine.draw_string(0, 0, &legend, BackgroundColors::White, ForegroundColors::Black);
-
                 let cell = |x: usize, y: usize| snapshot[y * self.width + x];
                 let live_neighbours = cell(x - 1, y - 1) + cell(x, y - 1) + cell(x + 1, y - 1) +
                                       cell(x - 1, y) + 0 + cell(x + 1, y) +
@@ -44,17 +56,17 @@ impl GamePlay for Game {
 
                 let is_alive = cell(x, y) == 1;
 
-                /*self.world[y * self.width + x] = match live_neighbours {
+                self.world[y * self.width + x] = match live_neighbours {
                     2 => if is_alive { 1 } else { 0 },
                     3 => 1,
                     0..=1 => 0,
-                    4.. => 0
-                };*/
+                    4.. => 0,
+                };
 
                 /*self.world[y * self.width + x] = match live_neighbours {
-                    2..=4 => 1, // Reproducing
+                    2..=2 => 1, // Reproducing
                     0..=1 => 0, // Under population
-                    5.. => 0,   // Over population
+                    3.. => 0,   // Over population
                 };*/
             }
         }
@@ -77,19 +89,19 @@ impl Game {
         let mut x = x;
 
         for c in pattern.as_bytes() {
-            self.world[y * self.width + x] = if *c == b'#' { 1 } else { 0 };
+            self.world[y * self.width + x] = if *c == b'0' { 1 } else { 0 };
             x += 1;
         }
     }
 }
 
 fn main() {
-    let mut game = Game::new(420, 80);
-    //game.cell_pattern(60, 60, "##");
-    game.cell_pattern (30, 40, "######## #####   ###      ####### #####");
-    /*game.cell_pattern (100, 100, "######## #####   ###      ####### #####");
-    game.cell_pattern (200, 100, "######## #####   ###      ####### #####");
-    game.cell_pattern (0, 100, "######## #####   ###      ####### #####");*/
+    let mut game = Game::new(220, 120);
+    game.cell_pattern(1, 1, ".0.");
+    game.cell_pattern(1, 2, "..0");
+    game.cell_pattern(1, 3, "000");
+
+    game.cell_pattern(55, 60, "00000000.00000...000......0000000.00000");
 
     let mut engine = GameEngine::new(game.width, game.height);
     engine.begin(&mut game).unwrap();
