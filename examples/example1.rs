@@ -19,8 +19,7 @@ impl GamePlay for MyGamePlay {
                 BlockChars::DarkShade,
                 BackgroundColors::Black,
                 ForegroundColors::White,
-            )
-            .unwrap();
+            );
 
         engine
             .fill(
@@ -31,8 +30,7 @@ impl GamePlay for MyGamePlay {
                 BlockChars::Solid,
                 BackgroundColors::Black,
                 ForegroundColors::White,
-            )
-            .unwrap();
+            );
 
         if let Ok(key) = terminal::get_keypress() {
             match key {
@@ -44,6 +42,10 @@ impl GamePlay for MyGamePlay {
                 _ => (),
             }
         }
+
+        /*let fps = 1.0/elapsed_time;
+        let legend = format!("FPS: {}", fps);
+        engine.draw_string(0, 0, &legend, BackgroundColors::White, ForegroundColors::Black);*/
 
         //self.x += self.xvel * elapsed_time;
         //self.y = self.x.sin() * engine.height() as f64 / 2.0;
