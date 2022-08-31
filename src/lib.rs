@@ -275,6 +275,7 @@ impl GameEngine {
             }
 
             self.flush();
+            std::thread::sleep(Duration::from_millis(10));
         }
 
         terminal::enter_canon_mode()?;
