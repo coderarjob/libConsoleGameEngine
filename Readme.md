@@ -3,16 +3,16 @@
 ![Game of life](/doc/life.png)
 
 API for the creation of character based games in Linux. The inspiration came from the
-[olcConsoleGameEngine](https://www.youtube.com/watch?v=u5BhrA8ED0o). It is my attempt to recreate 
+[olcConsoleGameEngine](https://www.youtube.com/watch?v=u5BhrA8ED0o). This is my attempt to recreate 
 few of its features in Linux.
 
 At the current stage, the library contains API for the following.
 
-1. To create a game board (which is a rectangle of some width and height in characters), and
-   includes functions to fill the board with block Unicode characters. This can use used to
-   draw the 'World' as well as other 'assets' for the game.
-
-2. Function to read input from keyboard in a non-blocking faction.
+1. To create a game board (which is a rectangle of some width and height in characters, called
+   `cells`).
+2. Functions to `draw` strings, `set` a cell and to `fill` a portion of the board with block Unicode
+   characters. These functions are used to draw the 'World' as well as other 'assets' for the game.
+3. Function to read input from keyboard in a non-blocking faction.
 
 ### Dependencies
 
