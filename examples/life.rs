@@ -44,12 +44,12 @@ impl GamePlay for Game {
             for y in 1..engine.height() - 1 {
                 let mut block_char = BlockChars::Solid;
                 let mut bg_color = BackgroundColors::Black;
-                let mut fg_color = ForegroundColors::Green;
+                let mut fg_color = ForegroundColors::Yellow;
 
                 if self.get_cell(x, y) == 0 {
-                    block_char = BlockChars::LightShaded;
+                    block_char = BlockChars::Blank;
                     bg_color = BackgroundColors::Black;
-                    fg_color = ForegroundColors::White;
+                    fg_color = ForegroundColors::Black;
                 }
 
                 engine.draw_pixel(x, y, block_char, bg_color, fg_color);
@@ -104,7 +104,7 @@ impl Game {
         let mut x = x;
 
         for c in pattern.as_bytes() {
-            self.world[y * self.width + x] = if *c == b'0' { 1 } else { 0 };
+            self.world[y * self.width + x] = if *c == b'O' { 1 } else { 0 };
             x += 1;
         }
     }
@@ -112,12 +112,22 @@ impl Game {
 
 fn main() {
     let mut game = Game::new(220, 120);
-    game.fill_pattern(1, 1, ".0.");
-    game.fill_pattern(1, 2, "..0");
-    game.fill_pattern(1, 3, "000");
+    game.fill_pattern (2,2,"........................O");
+    game.fill_pattern (2,3, "......................O.O");
+    game.fill_pattern (2,4, "............OO......OO............OO");
+    game.fill_pattern (2,5, "...........O...O....OO............OO");
+    game.fill_pattern (2,6, "OO........O.....O...OO");
+    game.fill_pattern (2,7, "OO........O...O.OO....O.O");
+    game.fill_pattern (2,8, "..........O.....O.......O");
+    game.fill_pattern (2,9, "...........O...O");
+    game.fill_pattern (2,10, "............OO");
 
-    game.fill_pattern(55, 60, "00000000.00000...000......0000000.00000");
-    game.fill_pattern(55, 2, "00000000.00000...000......0000000.00000");
+    /*game.fill_pattern(1, 1, ".O.");
+    game.fill_pattern(1, 2, "..O");
+    game.fill_pattern(1, 3, "OOO");*/
+
+    //game.fill_pattern(55, 2, "OOOOOOOO.OOOOO...OOO......OOOOOOO.OOOOO");
+    game.fill_pattern(55, 60, "OOOOOOOO.OOOOO...OOO......OOOOOOO.OOOOO");
 
     let mut engine = GameEngine::new(game.width, game.height);
     engine.begin(&mut game).unwrap();
