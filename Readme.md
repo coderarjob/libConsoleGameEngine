@@ -1,6 +1,6 @@
 ## Console Game Engine for Linux-like OS
 
-![Game of life](/doc/life.png)
+![Game of life](/doc/life.gif)
 
 API for the creation of character based games in Linux. The inspiration came from the
 [olcConsoleGameEngine](https://www.youtube.com/watch?v=u5BhrA8ED0o). This is my attempt to recreate 
