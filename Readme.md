@@ -1,4 +1,4 @@
-## Console Game Engine for Linux-like OS
+## Console Game Engine for Linux.
 
 ![Game of life](/doc/life.gif)
 
@@ -21,8 +21,7 @@ At the current stage, the library contains API for the following.
 ### Example
 
 ```rust
-use libconsolegameengine::terminal::Keys::*;
-use libconsolegameengine::*;
+use libconsolegameengine::game_engine::*;
 
 struct MyGamePlay;
 impl GamePlay for MyGamePlay {
@@ -37,7 +36,7 @@ impl GamePlay for MyGamePlay {
                     BlockChars::DarkShade,
                     BackgroundColors::Black,
                     ForegroundColors::White,
-                ).unwrap();
+                );
         true
     }
 }
