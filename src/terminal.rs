@@ -1,3 +1,6 @@
+//! This module contains functions that interact with the terminal in order to set its mode and to
+//! read back key presses without blocking.
+
 use libarl::*;
 use std::io::Error;
 use std::os::unix::io::*;
@@ -18,7 +21,7 @@ pub enum Keys {
     Other(String),
 }
 
-pub fn enable_non_blocking_stdio() -> Result<(), Error> {
+pub (crate) fn enable_non_blocking_stdio() -> Result<(), Error> {
     let stdin_fd = std::io::stdin().as_raw_fd();
 
     // Enable Non Blocking read and write.
@@ -26,7 +29,7 @@ pub fn enable_non_blocking_stdio() -> Result<(), Error> {
     Ok(())
 }
 
-pub fn disable_non_blocking_stdio() -> Result<(), Error> {
+pub (crate) fn disable_non_blocking_stdio() -> Result<(), Error> {
     let stdin_fd = std::io::stdin().as_raw_fd();
 
     // Disable Non Blocking read and write.
@@ -35,7 +38,7 @@ pub fn disable_non_blocking_stdio() -> Result<(), Error> {
     Ok(())
 }
 
-pub fn enter_raw_mode() -> Result<(), Error> {
+pub (crate) fn enter_raw_mode() -> Result<(), Error> {
     let stdout_fd = std::io::stdout().as_raw_fd();
 
     // Switch to raw mode (Non cannonical and no echo)
@@ -47,7 +50,7 @@ pub fn enter_raw_mode() -> Result<(), Error> {
     Ok(())
 }
 
-pub fn enter_canon_mode() -> Result<(), Error> {
+pub (crate) fn enter_canon_mode() -> Result<(), Error> {
     let stdout_fd = std::io::stdout().as_raw_fd();
 
     // Disable to raw mode and enable echoing
@@ -76,6 +79,7 @@ fn get_keybytes() -> Option<String> {
     }
 }
 
+/// Returns keyboard key presses without blocking.
 pub fn get_keypress() -> Result<Keys, Error> {
     // Note:
     // Settings non blocking flag to stdin, has an undesired side-effect in Linux - both the stdin

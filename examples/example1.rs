@@ -1,4 +1,5 @@
 use libconsolegameengine::terminal::Keys::*;
+use libconsolegameengine::game_engine::*;
 use libconsolegameengine::*;
 
 struct MyGamePlay {

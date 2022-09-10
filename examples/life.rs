@@ -8,7 +8,7 @@
 //! ```
 
 use libconsolegameengine::terminal::{Keys, *};
-use libconsolegameengine::*;
+use libconsolegameengine::game_engine::*;
 
 #[derive(Clone)]
 struct Game {
