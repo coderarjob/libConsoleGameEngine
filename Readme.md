@@ -25,6 +25,11 @@ use libconsolegameengine::game_engine::*;
 
 struct MyGamePlay;
 impl GamePlay for MyGamePlay {
+    fn init(&mut self, engine: &mut GameEngine) -> bool {
+         // No static assets.
+         true
+     }
+
     fn draw(&mut self, engine: &mut GameEngine, elapsed_time: f64) -> bool {
 
         // Clear the game board.

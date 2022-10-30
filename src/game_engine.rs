@@ -74,6 +74,9 @@ struct Pixel {
 
 /// Need to be implemented for the game state struct.
 pub trait GamePlay {
+    /// Use to draw static parts of the game.
+    fn init(&mut self, engine: &mut GameEngine) -> bool;
+
     /// Contains the logic to change game state and draw the game world.
     fn draw(&mut self, engine: &mut GameEngine, elapsed_time: f64) -> bool;
 }
@@ -229,18 +232,21 @@ impl GameEngine {
     /// game world.
     pub fn begin<T: GamePlay>(&mut self, game_play: &mut T) -> Result<(), Error> {
         terminal::enter_raw_mode()?;
-
         let mut now = Instant::now();
-        loop {
-            let elapsed_time = now.elapsed();
-            now = Instant::now();
 
-            if game_play.draw(self, elapsed_time.as_secs_f64()) == false {
-                break; // exit game loop
+        // For drawing static parts of the game.
+        if game_play.init (self) == true {
+            loop {
+                let elapsed_time = now.elapsed();
+                now = Instant::now();
+
+                if game_play.draw(self, elapsed_time.as_secs_f64()) == false {
+                    break; // exit game loop
+                }
+
+                self.flush();
+                std::thread::sleep(Duration::from_millis(10));
             }
-
-            self.flush();
-            std::thread::sleep(Duration::from_millis(10));
         }
 
         terminal::enter_canon_mode()?;

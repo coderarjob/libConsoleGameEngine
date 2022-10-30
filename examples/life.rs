@@ -7,7 +7,7 @@
 //! $ xterm -en UTF-8 -bg black -fg white -fa 'DejaVu Sans Mono:size=4.0:antialias=true' -e cargo run --example life
 //! ```
 
-use libconsolegameengine::terminal::{Keys, *};
+use libconsolegameengine::terminal::*;
 use libconsolegameengine::game_engine::*;
 
 #[derive(Clone)]
@@ -19,6 +19,21 @@ struct Game {
 }
 
 impl GamePlay for Game {
+    fn init(&mut self, engine: &mut GameEngine) -> bool {
+        // Static asset. Need to be drawn only once.
+        let quit_notice = "Press Enter to quit.";
+
+        engine.draw_string(
+            self.width - quit_notice.len(),
+            0,
+            quit_notice,
+            BackgroundColors::White,
+            ForegroundColors::Black,
+        );
+
+        true
+    }
+
     fn draw(&mut self, engine: &mut GameEngine, elapsed_time: f64) -> bool {
         // Draw the Generation and FPS
         let fps = 1.0 / elapsed_time;
