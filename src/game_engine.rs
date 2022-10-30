@@ -11,7 +11,6 @@ use std::time::*;
 use super::terminal;
 
 /// Unix terminal Foreground colors.
-#[repr(C)]
 #[derive(Copy, Clone, PartialEq)]
 pub enum ForegroundColors {
     Black = 30,
@@ -25,7 +24,6 @@ pub enum ForegroundColors {
 }
 
 /// Unix terminal Background colors.
-#[repr(C)]
 #[derive(Copy, Clone, PartialEq)]
 pub enum BackgroundColors {
     Black = 40,
