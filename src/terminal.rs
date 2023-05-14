@@ -10,6 +10,32 @@ const KEY_RIGHT: &str = "\x1b[C";
 const KEY_DOWN: &str = "\x1b[B";
 const KEY_LEFT: &str = "\x1b[D";
 
+/// Unix terminal Foreground colors.
+#[derive(Copy, Clone, PartialEq)]
+pub enum ForegroundColors {
+    Black = 30,
+    Red = 31,
+    Green = 32,
+    Yellow = 33,
+    Blue = 34,
+    Magenta = 35,
+    Cyan = 36,
+    White = 37,
+}
+
+/// Unix terminal Background colors.
+#[derive(Copy, Clone, PartialEq)]
+pub enum BackgroundColors {
+    Black = 40,
+    Red = 41,
+    Green = 42,
+    Yellow = 43,
+    Blue = 44,
+    Magenta = 45,
+    Cyan = 46,
+    White = 47,
+}
+
 #[derive(Debug, PartialEq)]
 pub enum Keys {
     Left,
@@ -21,7 +47,7 @@ pub enum Keys {
     Other(String),
 }
 
-pub (crate) fn enable_non_blocking_stdio() -> Result<(), Error> {
+pub(crate) fn enable_non_blocking_stdio() -> Result<(), Error> {
     let stdin_fd = std::io::stdin().as_raw_fd();
 
     // Enable Non Blocking read and write.
@@ -29,7 +55,7 @@ pub (crate) fn enable_non_blocking_stdio() -> Result<(), Error> {
     Ok(())
 }
 
-pub (crate) fn disable_non_blocking_stdio() -> Result<(), Error> {
+pub(crate) fn disable_non_blocking_stdio() -> Result<(), Error> {
     let stdin_fd = std::io::stdin().as_raw_fd();
 
     // Disable Non Blocking read and write.
@@ -38,7 +64,7 @@ pub (crate) fn disable_non_blocking_stdio() -> Result<(), Error> {
     Ok(())
 }
 
-pub (crate) fn enter_raw_mode() -> Result<(), Error> {
+pub(crate) fn enter_raw_mode() -> Result<(), Error> {
     let stdout_fd = std::io::stdout().as_raw_fd();
 
     // Switch to raw mode (Non cannonical and no echo)
@@ -50,7 +76,7 @@ pub (crate) fn enter_raw_mode() -> Result<(), Error> {
     Ok(())
 }
 
-pub (crate) fn enter_canon_mode() -> Result<(), Error> {
+pub(crate) fn enter_canon_mode() -> Result<(), Error> {
     let stdout_fd = std::io::stdout().as_raw_fd();
 
     // Disable to raw mode and enable echoing
@@ -61,6 +87,26 @@ pub (crate) fn enter_canon_mode() -> Result<(), Error> {
     t.c_lflag |= ICANON;
     tcsetattr(stdout_fd, TCSAFLUSH, &t)?;
     Ok(())
+}
+
+/// Moves cursor at the position (x, y).
+///
+/// (0,0) is the top left corner.
+///
+/// # Arguments
+/// * `x` - 0 based number representing X axis.
+/// * `y` - 0 based number representing Y axis.
+///
+pub(crate) fn set_cursor_position(x: usize, y: usize) {
+    print!("\x1b[{};{}f", y + 1, x + 1);
+}
+
+pub(crate) fn set_cursor_color(bg: BackgroundColors, fg: ForegroundColors) {
+    print!("\x1b[{};{}m", bg as u32, fg as u32);
+}
+
+pub(crate) fn reset_cursor_color() {
+    print!("\x1b[0m");
 }
 
 fn get_keybytes() -> Option<String> {

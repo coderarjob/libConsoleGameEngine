@@ -1,40 +1,15 @@
-//! Game Engine implements various functions to sets up an internal buffer, runs the game play 
+//! Game Engine implements various functions to sets up an internal buffer, runs the game play
 //! logic to update the buffer and then draws the buffer on screen. This module also contains
 //! methods to draw shapes and text on the buffer.
 //!
-//! Only the parts which have changed from the previous frame are drawn. 
+//! Only the parts which have changed from the previous frame are drawn.
 
 #![warn(dead_code)]
 
+use super::terminal;
+use super::terminal::{BackgroundColors, ForegroundColors};
 use std::io::Error;
 use std::time::*;
-use super::terminal;
-
-/// Unix terminal Foreground colors.
-#[derive(Copy, Clone, PartialEq)]
-pub enum ForegroundColors {
-    Black = 30,
-    Red = 31,
-    Green = 32,
-    Yellow = 33,
-    Blue = 34,
-    Magenta = 35,
-    Cyan = 36,
-    White = 37,
-}
-
-/// Unix terminal Background colors.
-#[derive(Copy, Clone, PartialEq)]
-pub enum BackgroundColors {
-    Black = 40,
-    Red = 41,
-    Green = 42,
-    Yellow = 43,
-    Blue = 44,
-    Magenta = 45,
-    Cyan = 46,
-    White = 47,
-}
 
 /// Unicode Block characters used to draw items in the game board.
 #[derive(Copy, Clone, PartialEq)]
@@ -184,7 +159,7 @@ impl GameEngine {
     /// Only those pixels are drawn which has changed since the previous.
     pub fn flush(&mut self) {
         // Move cursor to 1,1 location.
-        println!("\x1b[1;1f");
+        terminal::set_cursor_position(0, 0);
 
         /*for y in 0..self.height {
             for x in 0..self.width {
@@ -215,15 +190,14 @@ impl GameEngine {
                     let c: char = pixel.character.into();
                     pixel.dirty = false;
 
-                    //print!("\x1b[{};{}f", y + self.height, x + 1);
-                    print!("\x1b[{};{}f", y + 1, x + 1); // Move cursor
-                    print!("\x1b[{};{}m", pixel.bg_color as u32, pixel.fg_color as u32);
+                    terminal::set_cursor_position(x, y);
+                    terminal::set_cursor_color(pixel.bg_color, pixel.fg_color);
                     print!("{}", c);
                 }
             }
         }
 
-        print!("\x1b[0m"); // Reset colors
+        terminal::reset_cursor_color();
     }
 
     /// This contains the game loop and executes the use logic for game play and drawing of the
@@ -233,7 +207,7 @@ impl GameEngine {
         let mut now = Instant::now();
 
         // For drawing static parts of the game.
-        if game_play.init (self) == true {
+        if game_play.init(self) == true {
             loop {
                 let elapsed_time = now.elapsed();
                 now = Instant::now();

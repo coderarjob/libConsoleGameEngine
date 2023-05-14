@@ -1,4 +1,5 @@
 use libconsolegameengine::terminal::Keys::*;
+use libconsolegameengine::terminal::{BackgroundColors, ForegroundColors};
 use libconsolegameengine::game_engine::*;
 use libconsolegameengine::*;
 
@@ -50,7 +51,7 @@ impl GamePlay for MyGamePlay {
         }
 
         let fps = 1.0/elapsed_time;
-        let legend = format!("FPS: {}", fps);
+        let legend = format!("FPS: {:3.2}", fps);
         engine.draw_string(0, 0, &legend, BackgroundColors::White, ForegroundColors::Black);
 
         std::thread::sleep(std::time::Duration::from_millis(10));

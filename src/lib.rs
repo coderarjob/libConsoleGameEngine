@@ -13,6 +13,7 @@
 //!
 //! ```rust
 //! use libconsolegameengine::terminal::Keys::*;
+//! use libconsolegameengine::terminal::{BackgroundColors, ForegroundColors};
 //! use libconsolegameengine::*;
 //! use libconsolegameengine::game_engine::*;
 //!
@@ -44,5 +45,5 @@
 //!
 //! [`olcConsoleGameEngine`]: https://github.com/OneLoneCoder/videos/blob/master/olcConsoleGameEngine.h
 
-pub mod terminal;
 pub mod game_engine;
+pub mod terminal;
