@@ -53,8 +53,7 @@ impl GamePlay for MyGamePlay {
         let legend = format!("FPS: {}", fps);
         engine.draw_string(0, 0, &legend, BackgroundColors::White, ForegroundColors::Black);
 
-        //self.x += self.xvel * elapsed_time;
-        //self.y = self.x.sin() * engine.height() as f64 / 2.0;
+        std::thread::sleep(std::time::Duration::from_millis(10));
 
         true
     }

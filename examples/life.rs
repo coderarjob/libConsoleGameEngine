@@ -7,8 +7,10 @@
 //! $ xterm -en UTF-8 -bg black -fg white -fa 'DejaVu Sans Mono:size=4.0:antialias=true' -e cargo run --example life
 //! ```
 
-use libconsolegameengine::terminal::*;
 use libconsolegameengine::game_engine::*;
+use libconsolegameengine::terminal::*;
+use std::thread;
+use std::time::Duration;
 
 #[derive(Clone)]
 struct Game {
@@ -16,17 +18,19 @@ struct Game {
     width: usize,
     height: usize,
     generation: u64,
+    max_fps: u32,
+    minimum_frame_period_ms: u64,
 }
 
 impl GamePlay for Game {
     fn init(&mut self, engine: &mut GameEngine) -> bool {
         // Static asset. Need to be drawn only once.
-        let quit_notice = "Press Enter to quit.";
+        let notice = "Press Up/Down to increase/decrease speed | Press Enter to quit";
 
         engine.draw_string(
-            self.width - quit_notice.len(),
+            self.width - notice.len(),
             0,
-            quit_notice,
+            notice,
             BackgroundColors::White,
             ForegroundColors::Black,
         );
@@ -42,14 +46,23 @@ impl GamePlay for Game {
         engine.draw_string(
             0,
             0,
-            &format!("{:40}", &legend),
+            &format!("{:30}", &legend),
             BackgroundColors::White,
             ForegroundColors::Black,
         );
 
         // Press enter to exit
-        if let Ok(Keys::Enter) = get_keypress() {
-            return false;
+        match get_keypress() {
+            Ok(Keys::Up) => {
+                self.max_fps += 1;
+                self.minimum_frame_period_ms = Game::get_frame_period_ms(self.max_fps);
+            }
+            Ok(Keys::Down) if self.max_fps > 1 => {
+                self.max_fps -= 1;
+                self.minimum_frame_period_ms = Game::get_frame_period_ms(self.max_fps);
+            }
+            Ok(Keys::Enter) => return false,
+            _ => (),
         }
 
         // Game logic and drawing
@@ -70,11 +83,15 @@ impl GamePlay for Game {
                 engine.draw_pixel(x, y, block_char, bg_color, fg_color);
 
                 let cell = |x: usize, y: usize| snapshot.get_cell(x, y);
+
+                #[rustfmt::skip]
                 let live_neighbours = cell(x - 1, y - 1) + cell(x, y - 1) + cell(x + 1, y - 1) +
-                                      cell(x - 1, y) + 0 + cell(x + 1, y) +
+                                      cell(x - 1, y)     + 0              + cell(x + 1, y)     +
                                       cell(x - 1, y + 1) + cell(x, y + 1) + cell(x + 1, y + 1);
 
                 let is_alive = cell(x, y) == 1;
+
+                #[rustfmt::skip]
                 let new_value = match live_neighbours {
                     2 => if is_alive { true } else { false },
                     3 => true,
@@ -82,28 +99,26 @@ impl GamePlay for Game {
                     4.. => false,
                 };
                 self.set_cell(x, y, new_value);
-
-                /*self.world[y * self.width + x] = match live_neighbours {
-                    2..=2 => 1, // Reproducing
-                    0..=1 => 0, // Under population
-                    3.. => 0,   // Over population
-                };*/
             }
         }
 
         self.generation += 1;
-        //std::thread::sleep(std::time::Duration::from_millis(500));
+
+        thread::sleep(Duration::from_millis(self.minimum_frame_period_ms));
+
         true
     }
 }
 
 impl Game {
-    pub fn new(width: usize, height: usize) -> Game {
+    pub fn new(width: usize, height: usize, max_fps: u32) -> Game {
         Game {
             width,
             height,
             world: vec![0; width * height],
             generation: 0,
+            max_fps,
+            minimum_frame_period_ms: Self::get_frame_period_ms(max_fps)
         }
     }
 
@@ -123,19 +138,24 @@ impl Game {
             x += 1;
         }
     }
+
+    pub fn get_frame_period_ms (max_fps: u32) -> u64 {
+        1000 / max_fps as u64
+    }
+
 }
 
 fn main() {
-    let mut game = Game::new(220, 120);
-    game.fill_pattern (2,2,"........................O");
-    game.fill_pattern (2,3, "......................O.O");
-    game.fill_pattern (2,4, "............OO......OO............OO");
-    game.fill_pattern (2,5, "...........O...O....OO............OO");
-    game.fill_pattern (2,6, "OO........O.....O...OO");
-    game.fill_pattern (2,7, "OO........O...O.OO....O.O");
-    game.fill_pattern (2,8, "..........O.....O.......O");
-    game.fill_pattern (2,9, "...........O...O");
-    game.fill_pattern (2,10, "............OO");
+    let mut game = Game::new(220, 120, 5);
+    game.fill_pattern(2, 2, "........................O");
+    game.fill_pattern(2, 3, "......................O.O");
+    game.fill_pattern(2, 4, "............OO......OO............OO");
+    game.fill_pattern(2, 5, "...........O...O....OO............OO");
+    game.fill_pattern(2, 6, "OO........O.....O...OO");
+    game.fill_pattern(2, 7, "OO........O...O.OO....O.O");
+    game.fill_pattern(2, 8, "..........O.....O.......O");
+    game.fill_pattern(2, 9, "...........O...O");
+    game.fill_pattern(2, 10, "............OO");
 
     /*game.fill_pattern(1, 1, ".O.");
     game.fill_pattern(1, 2, "..O");

@@ -243,7 +243,6 @@ impl GameEngine {
                 }
 
                 self.flush();
-                std::thread::sleep(Duration::from_millis(10));
             }
         }
 
